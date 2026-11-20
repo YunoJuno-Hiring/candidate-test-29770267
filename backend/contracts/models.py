@@ -1,6 +1,10 @@
+from decimal import ROUND_HALF_UP, Decimal
+
 from django.db import models
 
 from accounts.models import Company, Freelancer
+
+HOURS_PER_DAY = Decimal('8')
 
 
 class Contract(models.Model):
@@ -20,6 +24,11 @@ class Contract(models.Model):
 
     def __str__(self):
         return f'{self.freelancer.name} @ {self.company.name} ({self.status})'
+
+    def cost_for_hours(self, hours):
+        """Price a number of hours against the daily rate, assuming an 8-hour day."""
+        cost = Decimal(hours) / HOURS_PER_DAY * self.daily_rate
+        return cost.quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
 
 
 class TimesheetEntry(models.Model):

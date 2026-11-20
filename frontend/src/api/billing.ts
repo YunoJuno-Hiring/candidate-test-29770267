@@ -1,7 +1,11 @@
-import { api, BillingRunResult, Invoice } from './client'
+import { api, BillingPeriod, BillingRunResult, Invoice } from './client'
 
 export function runBilling(month: string): Promise<BillingRunResult> {
   return api.post('/api/billing/runs/', { month })
+}
+
+export function fetchBillingPeriod(month: string): Promise<BillingPeriod> {
+  return api.get(`/api/billing/periods/${month}/`)
 }
 
 export function fetchInvoices(month: string): Promise<Invoice[]> {
