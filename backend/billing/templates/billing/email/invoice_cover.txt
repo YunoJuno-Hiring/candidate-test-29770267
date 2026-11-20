@@ -1,0 +1,7 @@
+Hello,
+
+Please find attached invoice {{ invoice.number }} for work carried out by {{ freelancer.name }} for {{ company.name }} during {{ month|date:"F Y" }}.
+
+Invoice total: £{{ invoice.total }}
+
+The invoice itself is in the attached file, {{ document.filename }}.

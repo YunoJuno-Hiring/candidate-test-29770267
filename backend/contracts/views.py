@@ -3,6 +3,8 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from billing.services import is_invoiced
+
 from .models import Contract, TimesheetEntry
 from .serializers import (
     ContractCreateSerializer,
@@ -123,6 +125,12 @@ class TimesheetListCreateView(APIView):
         except Contract.DoesNotExist:
             return Response({'contract': 'Invalid contract.'}, status=status.HTTP_400_BAD_REQUEST)
 
+        if is_invoiced(contract, serializer.validated_data['date']):
+            return Response(
+                {'date': 'This month has already been invoiced.'},
+                status=status.HTTP_409_CONFLICT,
+            )
+
         entry = serializer.save(contract=contract, status=TimesheetEntry.STATUS_SUBMITTED)
         return Response(TimesheetEntrySerializer(entry).data, status=status.HTTP_201_CREATED)
 
@@ -150,6 +158,12 @@ class TimesheetDetailView(APIView):
         else:
             return Response({'detail': 'Not found.'}, status=status.HTTP_404_NOT_FOUND)
 
+        if is_invoiced(entry.contract, entry.date):
+            return Response(
+                {'detail': 'This entry is in a month that has already been invoiced and can no longer be changed.'},
+                status=status.HTTP_409_CONFLICT,
+            )
+
         new_status = request.data.get('status')
         rejection_reason = request.data.get('rejection_reason')
 
@@ -161,5 +175,13 @@ class TimesheetDetailView(APIView):
 
         serializer = TimesheetEntrySerializer(entry, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
+
+        new_date = serializer.validated_data.get('date', entry.date)
+        if new_date != entry.date and is_invoiced(entry.contract, new_date):
+            return Response(
+                {'date': 'That month has already been invoiced.'},
+                status=status.HTTP_409_CONFLICT,
+            )
+
         serializer.save()
         return Response(serializer.data)

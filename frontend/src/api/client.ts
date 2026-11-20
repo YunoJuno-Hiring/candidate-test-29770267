@@ -37,14 +37,29 @@ export interface TimesheetEntry {
   rejection_reason: string | null
 }
 
+export interface BillingPeriod {
+  month: string
+  status: 'not_run' | 'complete' | 'incomplete'
+  completed_at: string | null
+  held_freelancers: FreelancerProfile[]
+}
+
 export interface BillingRunResult {
-  run_id: string
+  run_id: number
   invoices_generated: number
+  emails_failed: number
   status: string
+  period: BillingPeriod
 }
 
 export interface Invoice {
-  id: string | number
+  id: number
+  number: string
+  month: string
+  company: Company
+  freelancer: FreelancerProfile
+  total: string
+  created_at: string
   [key: string]: unknown
 }
 

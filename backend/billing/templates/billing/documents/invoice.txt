@@ -1,0 +1,12 @@
+Invoice {{ invoice.number }}
+Billing period: {{ month|date:"F Y" }}
+
+From: {{ freelancer.name }}
+To:   {{ company.name }}
+
+Date         Hours    Day rate      Amount
+{% for line in lines %}{{ line.date|date:"Y-m-d" }}   {{ line.hours|stringformat:"6s" }}   £{{ line.daily_rate|stringformat:"9s" }}   £{{ line.amount|stringformat:"9s" }}
+{% endfor %}
+Total: £{{ invoice.total }}
+
+Amounts are calculated as hours / 8 x day rate.
